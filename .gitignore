@@ -1,0 +1,26 @@
+# Ignore compiled files
+*.o
+*.out
+
+# Ignore log files
+*.log
+
+# Ignore directories named "build" and "dist"
+/build/
+/dist/
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.lock.hcl
+.pub
+.pem
+.terraform/
+*.zip
+<<<<<<< HEAD
+.terraform.lock.hcl
+HEAD
+fsmonitor-watchman.sample
+post-update.sample
+update.sample
+pre-applypatch.sample
+=======
+>>>>>>> 701e860c78fe04f2f130a4f06f671be571d00147
