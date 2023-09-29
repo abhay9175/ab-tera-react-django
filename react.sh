@@ -13,9 +13,10 @@ sudp apt install -y npm
 npm -v
 sudo chown -R ubuntu:ubuntu /home/ubuntu/my-git-repo/reactfrontend
 cd /home/ubuntu/my-git-repo/reactfrontend/
-# Sleep for 2 minutes (120 seconds)
-sleep 120
-# Run the build command after the delay
+# # Sleep for 2 minutes (120 seconds)
+# sleep 120
+# # Run the build command after the delay
 npm install
 npm audit fix
-npm run-script build
+nohup npm start &
+# sudo npm run-script build

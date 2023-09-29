@@ -26,9 +26,9 @@ output "private_instance1_id" {
     value = aws_instance.private_instance1[0].id
 }
 
-output "private_instance2_id" {
-    value = aws_instance.private_instance2[0].id
-}
+# output "private_instance2_id" {
+#     value = aws_instance.private_instance2[0].id
+# }
 
 output "react_django_security_group_id" {
     value = aws_security_group.react_django.id
@@ -52,7 +52,7 @@ output "public_ip" {
 output "private_ips" {
     value = concat(
     aws_instance.private_instance1[*].private_ip,
-    aws_instance.private_instance2[*].private_ip
+    # aws_instance.private_instance2[*].private_ip
     )
 }
 
@@ -70,9 +70,9 @@ output "private_instance1_az" {
     value = aws_instance.private_instance1[0].availability_zone
 }
 
-output "private_instance2_az" {
-    value = aws_instance.private_instance2[0].availability_zone
-}
+# output "private_instance2_az" {
+#     value = aws_instance.private_instance2[0].availability_zone
+# }
 
 # Output the route table ID for the public route table
 
@@ -88,32 +88,32 @@ output "private_key" {
     sensitive   = true
 }
 
-output "instance_cpu_core_count" {
-    description = "Number of CPU cores for the EC2 instance"
-    value       = aws_instance.public_instance.cpu_core_count
-}
+# output "instance_cpu_core_count" {
+#     description = "Number of CPU cores for the EC2 instance"
+#     value       = aws_instance.public_instance.cpu_core_count
+# }
 
-output "instance_cpu_threads_per_core" {
-    description = "Number of threads per CPU core for the EC2 instance"
-    value       = aws_instance.public_instance.cpu_threads_per_core
-}
+# output "instance_cpu_threads_per_core" {
+#     description = "Number of threads per CPU core for the EC2 instance"
+#     value       = aws_instance.public_instance.cpu_threads_per_core
+# }
 
-output "private_instance1_cpu_core_count" {
-    description = "Number of CPU cores for the first private EC2 instance"
-    value       = aws_instance.private_instance1[0].cpu_core_count
-}
+# output "private_instance1_cpu_core_count" {
+#     description = "Number of CPU cores for the first private EC2 instance"
+#     value       = aws_instance.private_instance1[0].cpu_core_count
+# }
 
-output "private_instance1_cpu_threads_per_core" {
-    description = "Number of threads per CPU core for the first private EC2 instance"
-    value       = aws_instance.private_instance1[0].cpu_threads_per_core
-}
+# output "private_instance1_cpu_threads_per_core" {
+#     description = "Number of threads per CPU core for the first private EC2 instance"
+#     value       = aws_instance.private_instance1[0].cpu_threads_per_core
+# }
 
-output "private_instance2_cpu_core_count" {
-    description = "Number of CPU cores for the second private EC2 instance"
-    value       = aws_instance.private_instance2[0].cpu_core_count
-}
+# output "private_instance2_cpu_core_count" {
+#     description = "Number of CPU cores for the second private EC2 instance"
+#     value       = aws_instance.private_instance2[0].cpu_core_count
+# }
 
-output "private_instance2_cpu_threads_per_core" {
-    description = "Number of threads per CPU core for the second private EC2 instance"
-    value       = aws_instance.private_instance2[0].cpu_threads_per_core
-}
+# output "private_instance2_cpu_threads_per_core" {
+#     description = "Number of threads per CPU core for the second private EC2 instance"
+#     value       = aws_instance.private_instance2[0].cpu_threads_per_core
+# }

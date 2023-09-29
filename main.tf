@@ -152,7 +152,6 @@ resource "aws_instance" "public_instance" {
   associate_public_ip_address = true # Enable a public IP for this instance
   key_name               = aws_key_pair.generated_key.key_name # Associate with the key pair
   vpc_security_group_ids = [aws_security_group.react_django.id] # Attach the security group
-  
   user_data              = file("react.sh")
 
   provisioner "remote-exec" {
@@ -166,6 +165,16 @@ resource "aws_instance" "public_instance" {
       "sudo sed -i 's/43.205.39.113/${aws_instance.private_instance1[0].private_ip}/g' /tmp/App.js",
       # Move the modified file back to its original location
       "sudo mv /tmp/App.js /home/ubuntu/my-git-repo/reactfrontend/src/App.js",
+      # Store the public ip in the file named public_ip
+      "echo '${aws_instance.public_instance.public_ip}' > /tmp/public_ip",
+      # Create a fike demo.pem
+      "touch /home/ubuntu/demo.pem",
+      # Now copy the private key into that file
+      "echo '${tls_private_key.private_key.private_key_pem}' > /home/ubuntu/demo.pem",
+      # Change permission
+      "chmod 644 /home/ubuntu/demo.pem",
+      # We need to use scp to transfer public_ip file for that we need this cmd
+      "sudo scp -o StrictHostKeyChecking=no -i /home/ubuntu/demo.pem /tmp/public_ip ubuntu@${aws_instance.private_instance1[0].private_ip}:/tmp/public_ip",
     ]
 
     connection {
@@ -189,45 +198,35 @@ resource "aws_instance" "private_instance1" {
   key_name      = aws_key_pair.generated_key.key_name # Associate with the key pair
   vpc_security_group_ids = [aws_security_group.react_django.id] # Attach the security group
   
-  user_data     = file("django.sh")
+  user_data = count.index == 0 ? file("django.sh") : null
 
   tags = {
     Name = "backend"
   }
 }
+  
 
-  # Add a provisioner to wait for the public instance to be ready
-resource "null_resource" "wait_for_public_instance" {
-  triggers = {
-    public_instance_id = aws_instance.public_instance.id
-  }
-
-  provisioner "local-exec" {
-    command = "sleep 120" # Wait for the public instance to start
-  }
-}
-
-# Add another provisioner to configure the private instance
-resource "null_resource" "configure_private_instance" {
-  triggers = {
-    public_instance_ip = aws_instance.public_instance.public_ip
-  }
+# # Add another provisioner to configure the private instance
+# resource "null_resource" "configure_private_instance" {
+#   triggers = {
+#     public_instance_ip = aws_instance.public_instance.public_ip
+#   }
 
 
-  provisioner "remote-exec" {
-    inline = [
-      # "ls -l /home/ubuntu/my-git-repo/reactfrontend/src/",  # Debugging command
-      # Wait for the completion of the git clone command (adjust the path as needed)
-      "until [ -f /home/ubuntu/my-git-repo/djangobackend/djangobackend/settings.py ]; do sleep 5; done",
-      # Use the file provisioner to copy the app.js file to a temporary directory
-      "sudo cp /home/ubuntu/my-git-repo/djangobackend/djangobackend/settings.py /tmp/settings.py",
-      # Replace the old IP address in the file with the private IP address
-      "sudo sed -i 's/43.205.39.113/${aws_instance.public_instance.private_ip}/g' /tmp/settings.py",
-      # Replace the old IP address in your CORS_ALLOWED_ORIGINS line
-      "sed -i 's|http://43.205.39.113:3000|${aws_instance.public_instance.public_ip}:3000|' /tmp/settings.py",
-      # Move the modified file back to its original location
-      "sudo mv /tmp/App.js /home/ubuntu/my-git-repo/djangobackend/djangobackend/settings.py",
-    ]
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     # "ls -l /home/ubuntu/my-git-repo/reactfrontend/src/",  # Debugging command
+  #     # Wait for the completion of the git clone command (adjust the path as needed)
+  #     "until [ -f /home/ubuntu/my-git-repo/djangobackend/djangobackend/settings.py ]; do sleep 5; done",
+  #     # Use the file provisioner to copy the app.js file to a temporary directory
+  #     "sudo cp /home/ubuntu/my-git-repo/djangobackend/djangobackend/settings.py /tmp/settings.py",
+  #     # Replace the old IP address in the file with the private IP address
+  #     "sudo sed -i 's/43.205.39.113/${aws_instance.public_instance.private_ip}/g' /tmp/settings.py",
+  #     # Replace the old IP address in your CORS_ALLOWED_ORIGINS line
+  #     "sed -i 's|http://43.205.39.113:3000|${aws_instance.public_instance.public_ip}:3000|' /tmp/settings.py",
+  #     # Move the modified file back to its original location
+  #     "sudo mv /tmp/App.js /home/ubuntu/my-git-repo/djangobackend/djangobackend/settings.py",
+  #   ]
 
   # provisioner "remote-exec" {
   #   inline = [
@@ -244,20 +243,20 @@ resource "null_resource" "configure_private_instance" {
   #     # ... other commands to configure your private instance ...
   #   ]
 
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"  # Update with your instance's SSH user
-      private_key = tls_private_key.private_key.private_key_pem
-      host        = aws_instance.private_instance1[0].private_ip # Use the private IP address of the private instance
-    }
-  }
-}
+  #   connection {
+  #     type        = "ssh"
+  #     user        = "ubuntu"  # Update with your instance's SSH user
+  #     private_key = tls_private_key.private_key.private_key_pem
+  #     host        = aws_instance.private_instance1[0].private_ip # Use the private IP address of the private instance
+  #   }
+  # }
+# }
 
-resource "aws_instance" "private_instance2" {
-  count         = 1
-  ami           = var.image_id # Replace with your desired AMI ID for the private instances
-  instance_type = var.instance_type
-  subnet_id     = aws_subnet.private2[count.index].id
-  key_name      = aws_key_pair.generated_key.key_name # Associate with the key pair
-  vpc_security_group_ids = [aws_security_group.react_django.id] # Attach the security group
-}
+# resource "aws_instance" "private_instance2" {
+#   count         = 1
+#   ami           = var.image_id # Replace with your desired AMI ID for the private instances
+#   instance_type = var.instance_type
+#   subnet_id     = aws_subnet.private2[count.index].id
+#   key_name      = aws_key_pair.generated_key.key_name # Associate with the key pair
+#   vpc_security_group_ids = [aws_security_group.react_django.id] # Attach the security group
+# }
